@@ -1,0 +1,28 @@
+{
+  "name": "material-3-browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Material 3 Browser: website theming, browser theme and new tab page",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "web-ext lint --source-dir dist",
+    "package": "node build.mjs && web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest"
+  },
+  "dependencies": {
+    "@material/material-color-utilities": "^0.4.0",
+    "darkreader": "^4.9.133"
+  },
+  "devDependencies": {
+    "@types/firefox-webext-browser": "^143.0.1",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "web-ext": "^10.8.0"
+  }
+}

@@ -1,0 +1,97 @@
+/* Material 3 for the extension's pages: same look as the Material 3 Rust apps
+ * (Inter, pill buttons, rounded surface-container cards, M3 switches).
+ * Colors come from --m3-* variables set by ui.ts from the palette. */
+
+@font-face { font-family: "M3 Inter"; src: url("fonts/Inter-Regular.otf"); font-weight: 400; }
+@font-face { font-family: "M3 Inter"; src: url("fonts/Inter-Medium.otf"); font-weight: 500 700; }
+
+:root {
+  --m3-primary: #d0bcff; --m3-on-primary: #381e72;
+  --m3-primary-container: #4f378b; --m3-on-primary-container: #eaddff;
+  --m3-secondary-container: #4a4458; --m3-on-secondary-container: #e8def8;
+  --m3-tertiary-container: #633b48; --m3-on-tertiary-container: #ffd8e4;
+  --m3-error: #f2b8b5; --m3-error-container: #8c1d18; --m3-on-error-container: #f9dedc;
+  --m3-surface: #141218; --m3-on-surface: #e6e0e9; --m3-on-surface-variant: #cac4d0;
+  --m3-surface-container-lowest: #0f0d13; --m3-surface-container-low: #1d1b20;
+  --m3-surface-container: #211f26; --m3-surface-container-high: #2b2930;
+  --m3-surface-container-highest: #36343b;
+  --m3-outline: #938f99; --m3-outline-variant: #49454f;
+  --m3-inverse-surface: #e6e0e9; --m3-inverse-on-surface: #322f35;
+  color-scheme: dark;
+  font-family: "M3 Inter", system-ui, sans-serif;
+  font-size: 14px;
+}
+:root.light { color-scheme: light; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--m3-surface); color: var(--m3-on-surface); }
+h1 { font-size: 28px; font-weight: 400; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+h2 { font-size: 14px; font-weight: 500; color: var(--m3-primary); margin: 24px 0 8px; }
+.subtitle, .desc { color: var(--m3-on-surface-variant); }
+.desc { font-size: 12.5px; margin-top: 2px; }
+a { color: var(--m3-primary); }
+@font-face { font-family: "Material Symbols"; src: url("fonts/MaterialSymbolsRounded-Filled.ttf"); }
+.icon { font-family: "Material Symbols"; font-size: 22px; line-height: 1; width: 1em; height: 1em; display: inline-block; flex: none; font-weight: normal; font-style: normal; }
+
+.card { background: var(--m3-surface-container); border-radius: 20px; padding: 4px 20px; }
+.row { display: flex; align-items: center; gap: 16px; padding: 12px 0; min-height: 56px; }
+.row + .row { border-top: 1px solid var(--m3-outline-variant); }
+.row > .text { flex: 1; min-width: 0; }
+.row > .text > .title { font-size: 14.5px; }
+.row > .control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* Buttons */
+button, .button {
+  font: inherit; font-weight: 500; border: 0; border-radius: 999px; height: 36px; padding: 0 20px;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;
+  position: relative; overflow: hidden; color: var(--m3-primary); background: transparent;
+}
+button::after, .button::after { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; transition: opacity .12s; }
+button:hover::after, .button:hover::after { opacity: .08; }
+button:active::after { opacity: .12; }
+button.filled { background: var(--m3-primary); color: var(--m3-on-primary); }
+button.tonal { background: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+button.outlined { border: 1px solid var(--m3-outline); }
+button.icon-button { width: 40px; height: 40px; padding: 0; justify-content: center; color: var(--m3-on-surface-variant); }
+button:disabled { opacity: .38; cursor: default; }
+
+/* Switch (52×32) */
+.switch { appearance: none; width: 52px; height: 32px; border-radius: 16px; margin: 0; cursor: pointer; flex: none;
+  background: var(--m3-surface-container-highest); border: 2px solid var(--m3-outline); position: relative; transition: background .15s; }
+.switch::before { content: ""; position: absolute; top: 50%; left: 6px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--m3-outline); transform: translateY(-50%); transition: all .15s; }
+.switch:checked { background: var(--m3-primary); border-color: var(--m3-primary); }
+.switch:checked::before { left: 22px; width: 24px; height: 24px; background: var(--m3-on-primary); }
+
+/* Segmented buttons */
+.segmented { display: inline-flex; border: 1px solid var(--m3-outline); border-radius: 999px; overflow: hidden; }
+.segmented button { border-radius: 0; height: 34px; padding: 0 16px; color: var(--m3-on-surface); }
+.segmented button + button { border-left: 1px solid var(--m3-outline); }
+.segmented button.selected { background: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+
+/* Slider */
+input[type="range"] { accent-color: var(--m3-primary); width: 180px; }
+.slider-value { min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; color: var(--m3-on-surface-variant); }
+
+/* Text fields */
+input[type="text"], input[type="url"], input[type="search"], textarea, select {
+  font: inherit; color: var(--m3-on-surface); background: var(--m3-surface-container-highest);
+  border: 0; border-bottom: 1px solid var(--m3-on-surface-variant); border-radius: 8px 8px 0 0; padding: 8px 12px; outline: none;
+}
+input:focus, textarea:focus, select:focus { border-bottom: 2px solid var(--m3-primary); }
+textarea { width: 100%; min-height: 120px; font-family: ui-monospace, monospace; font-size: 12.5px; resize: vertical; }
+input[type="color"] { width: 36px; height: 36px; border: 0; padding: 0; background: none; cursor: pointer; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px 0 12px; border-radius: 8px;
+  border: 1px solid var(--m3-outline-variant); color: var(--m3-on-surface-variant); font-weight: 500; }
+.chip button { height: 24px; width: 24px; padding: 0; justify-content: center; }
+
+.banner { display: flex; gap: 12px; align-items: center; border-radius: 16px; padding: 12px 16px; margin: 12px 0;
+  background: var(--m3-tertiary-container); color: var(--m3-on-tertiary-container); }
+.banner.error { background: var(--m3-error-container); color: var(--m3-on-error-container); }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--m3-inverse-surface);
+  color: var(--m3-inverse-on-surface); padding: 12px 20px; border-radius: 10px; box-shadow: 0 3px 12px rgba(0,0,0,.3);
+  opacity: 0; transition: opacity .15s; pointer-events: none; }
+.toast.show { opacity: 1; }

@@ -1,0 +1,14 @@
+body { width: 360px; background: var(--m3-surface-container-low); }
+main { padding: 16px; }
+.site { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.site .favicon { width: 40px; height: 40px; border-radius: 50%; background: var(--m3-primary-container); color: var(--m3-on-primary-container);
+  display: grid; place-items: center; overflow: hidden; }
+.site .favicon img { width: 22px; height: 22px; }
+.site .host { font-size: 16px; font-weight: 500; }
+.status { font-size: 12.5px; color: var(--m3-on-surface-variant); }
+.card { padding: 0 16px; margin-top: 12px; }
+.row { min-height: 48px; padding: 8px 0; }
+.mode .segmented { width: 100%; display: flex; margin-top: 12px; }
+.mode .segmented button { flex: 1; justify-content: center; padding: 0 8px; }
+input[type="range"] { width: 130px; }
+.footer { display: flex; justify-content: space-between; margin-top: 12px; }
