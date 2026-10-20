@@ -1,0 +1,49 @@
+/*
+ * Material 3 Browser: selectors that depend on Zen's and Firefox's markup.
+ * Kept separate from userChrome.css so a browser update that renames
+ * something only needs this file patched. Everything here is cosmetic; if
+ * a selector stops matching, the UI simply looks like stock Zen.
+ */
+
+/* Pill-shaped URL bar. */
+#urlbar-background {
+  border-radius: 28px !important;
+}
+#urlbar[breakout-extend] > #urlbar-background,
+#urlbar[open] > #urlbar-background {
+  border-radius: var(--m3-radius-large, 28px) !important;
+}
+
+/* Tabs: rounded "pill" backgrounds, selected tab in secondary container. */
+.tabbrowser-tab .tab-background {
+  border-radius: 20px !important;
+}
+.tabbrowser-tab[selected] .tab-background,
+.tabbrowser-tab[multiselected] .tab-background {
+  background-color: var(--m3-secondary-container) !important;
+}
+.tabbrowser-tab[selected] .tab-label {
+  color: var(--m3-on-secondary-container) !important;
+}
+
+/* Zen's floating content area: Material 3 large radius. */
+#tabbrowser-tabbox,
+.browserSidebarContainer {
+  border-radius: var(--m3-radius, 16px) !important;
+}
+
+/* Zen workspaces and essentials. */
+.zen-workspace-button[active="true"] {
+  background-color: var(--m3-secondary-container) !important;
+  border-radius: 999px !important;
+}
+.tabbrowser-tab[zen-essential] .tab-background {
+  border-radius: var(--m3-radius, 16px) !important;
+}
+
+/* Context menus and panels: rounded items with a little inset. */
+menupopup > menuitem,
+menupopup > menu {
+  margin-inline: 6px !important;
+  padding-block: 6px !important;
+}

@@ -1,0 +1,6 @@
+[workspace]
+members = ["launcher"]
+resolver = "2"
+
+[profile.release]
+lto = "thin"

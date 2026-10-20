@@ -1,0 +1,117 @@
+/*
+ * Material 3 Browser: browser UI.
+ *
+ * Colors come from the extension through the WebExtension theme API, which
+ * Firefox exposes as "lwt" CSS variables and which recolor live whenever
+ * your palette changes. This file maps Zen's own color variables onto them
+ * so Zen's sidebar, workspaces, URL bar and split view follow the palette
+ * too, and sets Material 3 shapes. Selectors that depend on Zen's markup
+ * are kept apart in m3-compat.css.
+ *
+ * Managed by m3-browser: edits here are overwritten. Put your own rules in
+ * m3-custom.css, imported at the end.
+ */
+
+@import url("m3-compat.css");
+@import url("m3-custom.css");
+
+@font-face {
+  font-family: "M3 Inter";
+  src: url("fonts/Inter-Regular.otf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "M3 Inter";
+  src: url("fonts/Inter-Medium.otf");
+  font-weight: 500 700;
+}
+
+/* ---- Palette roles (from the theme API, with neutral fallbacks) ---- */
+:root {
+  --m3-surface: var(--toolbar-bgcolor, light-dark(#fdf8fd, #141218));
+  --m3-on-surface: var(--toolbar-color, light-dark(#1c1b1f, #e6e1e5));
+  --m3-surface-container: var(--lwt-accent-color, light-dark(#f2ecf4, #211f26));
+  --m3-surface-container-high: var(--arrowpanel-background, light-dark(#ece6ee, #2b2930));
+  --m3-surface-container-highest: var(--toolbar-field-background-color, light-dark(#e6e0e9, #36343b));
+  --m3-surface-container-low: var(--sidebar-background-color, var(--m3-surface-container));
+  --m3-on-surface-variant: var(--lwt-toolbarbutton-icon-fill, var(--toolbarbutton-icon-fill, light-dark(#49454f, #cac4d0)));
+  --m3-primary: var(--lwt-tab-line-color, var(--tab-line-color, AccentColor));
+  --m3-secondary-container: var(--tab-selected-bgcolor, light-dark(#e8def8, #4a4458));
+  --m3-on-secondary-container: var(--tab-selected-textcolor, var(--m3-on-surface));
+  --m3-outline-variant: var(--arrowpanel-border-color, light-dark(#cac4d0, #49454f));
+
+  --m3-radius-small: 8px;
+  --m3-radius: 16px;
+  --m3-radius-large: 28px;
+  --m3-font: "M3 Inter", "Inter", system-ui, sans-serif;
+}
+
+/* ---- Zen's variables follow the palette ---- */
+:root[lwtheme] {
+  --zen-primary-color: var(--m3-primary) !important;
+  --zen-colors-primary: var(--m3-secondary-container) !important;
+  --zen-colors-secondary: var(--m3-surface-container-high) !important;
+  --zen-colors-tertiary: var(--m3-surface) !important;
+  --zen-colors-hover-bg: color-mix(in srgb, var(--m3-on-surface) 8%, transparent) !important;
+  --zen-colors-primary-foreground: var(--m3-on-secondary-container) !important;
+  --zen-colors-border: var(--m3-outline-variant) !important;
+  --zen-colors-border-contrast: color-mix(in srgb, var(--m3-outline-variant) 60%, transparent) !important;
+  --zen-colors-input-bg: var(--m3-surface-container-highest) !important;
+  --zen-main-browser-background: var(--m3-surface-container) !important;
+  --zen-branding-bg: var(--m3-surface-container) !important;
+  --zen-branding-bg-reverse: var(--m3-on-surface) !important;
+  --zen-dialog-background: var(--m3-surface-container-high) !important;
+  --zen-urlbar-background: var(--m3-surface-container-highest) !important;
+  --zen-toolbar-element-bg: color-mix(in srgb, var(--m3-on-surface) 8%, transparent) !important;
+  --zen-accent-button-background: var(--m3-primary) !important;
+
+  --in-content-accent-color: var(--m3-primary) !important;
+  --focus-outline-color: var(--m3-primary) !important;
+  --button-primary-bgcolor: var(--m3-primary) !important;
+  --toolbarbutton-border-radius: 999px !important;
+  --tab-border-radius: 20px !important;
+  --arrowpanel-border-radius: var(--m3-radius) !important;
+  --panel-border-radius: var(--m3-radius) !important;
+}
+
+/* ---- Material 3 shapes and type ---- */
+:root {
+  --zen-border-radius: var(--m3-radius) !important;
+}
+
+#navigator-toolbox,
+#sidebar-box,
+#tabbrowser-tabs,
+menupopup,
+panel,
+#urlbar {
+  font-family: var(--m3-font) !important;
+}
+
+menupopup,
+panel {
+  --panel-border-radius: var(--m3-radius) !important;
+  --panel-background: var(--m3-surface-container-high) !important;
+  --panel-color: var(--m3-on-surface) !important;
+}
+
+menupopup > menuitem,
+menupopup > menu {
+  border-radius: var(--m3-radius-small) !important;
+}
+
+menupopup > menuitem:is([_moz-menuactive], :hover),
+menupopup > menu:is([_moz-menuactive], :hover) {
+  background-color: var(--m3-secondary-container) !important;
+  color: var(--m3-on-secondary-container) !important;
+}
+
+.toolbarbutton-1 > .toolbarbutton-icon,
+.toolbarbutton-1 > .toolbarbutton-badge-stack {
+  border-radius: 999px !important;
+}
+
+/* Selection and focus in the URL bar use the primary color. */
+#urlbar ::selection {
+  background-color: color-mix(in srgb, var(--m3-primary) 35%, transparent) !important;
+}

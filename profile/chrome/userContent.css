@@ -1,0 +1,14 @@
+/*
+ * Material 3 Browser: built-in pages (about:preferences, about:addons…).
+ * Websites are themed by the extension, not here.
+ * Managed by m3-browser: edits here are overwritten.
+ */
+
+@-moz-document url-prefix("about:") {
+  :root {
+    --border-radius-small: 8px !important;
+    --border-radius-medium: 16px !important;
+    --border-radius-large: 28px !important;
+    --button-border-radius: 999px !important;
+  }
+}
