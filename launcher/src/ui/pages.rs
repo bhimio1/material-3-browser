@@ -85,7 +85,7 @@ fn overview(ui: &mut Ui, app: &mut App) {
                     });
                 });
                 if matches!(plan.mode, ExtensionMode::NeedsSigning) {
-                    common::banner(ui, ICON_INFO, "Without the extension you still get the profile, the Material 3 browser styling and uBlock Origin, but not website theming or the live palette.", false, |ui| {
+                    common::banner(ui, ICON_INFO, "Without the extension you still get the profile, the Material 3 shapes (in neutral colors) and uBlock Origin, but not website theming or the live palette.", false, |ui| {
                         if widgets::button(ui, ButtonKind::Tonal, None, "Options").clicked() {
                             app.page = Page::Extension;
                         }

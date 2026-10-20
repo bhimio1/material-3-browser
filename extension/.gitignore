@@ -1,3 +1,5 @@
 node_modules
 dist
+stage
 web-ext-artifacts
+test/visual/out

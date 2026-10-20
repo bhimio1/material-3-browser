@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "web-ext lint --source-dir dist",
-    "package": "node build.mjs && web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest"
+    "stage": "node stage.mjs",
+    "render": "node test/visual/render.mjs"
   },
   "dependencies": {
     "@material/material-color-utilities": "^0.4.0",
@@ -21,6 +22,7 @@
     "@types/node": "^26.6.5",
     "esbuild": "^0.28.2",
     "jsdom": "^29.1.1",
+    "playwright-core": "^1.64.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5",
     "web-ext": "^10.8.0"

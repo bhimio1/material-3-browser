@@ -21,3 +21,4 @@ main > section { max-width: 880px; }
 .dial-item { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
 .dial-item input:first-child { width: 160px; }
 .dial-item input:nth-child(2) { flex: 1; }
+main > section + section { margin-top: 48px; }
