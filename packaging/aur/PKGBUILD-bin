@@ -1,0 +1,32 @@
+# Maintainer: bhimio1
+# Template: the release workflow fills in @PKGVER@ and @SHA256@ and publishes
+# this to the AUR as material-3-browser-bin.
+pkgname=material-3-browser-bin
+pkgver=@PKGVER@
+pkgrel=1
+pkgdesc="Zen/Firefox with a Material 3 profile: palette-themed websites and UI, ad blocking"
+arch=('x86_64')
+url="https://github.com/bhimio1/material-3-browser"
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'libglvnd' 'xdg-utils')
+optdepends=(
+  'zen-browser-bin: the recommended engine (AUR; or the app.zen_browser.zen Flatpak)'
+  'librewolf: engine that also runs unsigned builds of the extension'
+  'firefox: fallback engine'
+  'flatpak: running the Zen Flatpak'
+)
+provides=('material-3-browser')
+conflicts=('material-3-browser' 'material-3-browser-git')
+source=("$pkgname-$pkgver.tar.gz::$url/releases/download/v$pkgver/m3-browser-x86_64-linux.tar.gz")
+sha256sums=('@SHA256@')
+
+package() {
+  cd "m3-browser-x86_64-linux"
+  install -Dm755 m3-browser "$pkgdir/usr/bin/m3-browser"
+  install -Dm644 share/m3-browser/material-3-browser.xpi "$pkgdir/usr/share/m3-browser/material-3-browser.xpi"
+  cp -r share/m3-browser/extension "$pkgdir/usr/share/m3-browser/extension"
+  install -Dm644 material_3_browser.desktop "$pkgdir/usr/share/applications/material_3_browser.desktop"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 LICENSE-THIRD-PARTY.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE-THIRD-PARTY.md"
+  install -Dm644 LICENSE-Inter.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-Inter.txt"
+}

@@ -33,7 +33,7 @@ impl Assets {
         if let Some(exe_dir) = std::env::current_exe().ok().and_then(|e| e.parent().map(Path::to_path_buf)) {
             roots.push(exe_dir.join("../share/m3-browser"));
             // Running from target/{debug,release} in the repo.
-            roots.push(exe_dir.join("../../extension/dist-pkg"));
+            roots.push(exe_dir.join("../../extension/stage"));
         }
         roots.push(PathBuf::from("/usr/share/m3-browser"));
         roots.push(engine::data_dir());

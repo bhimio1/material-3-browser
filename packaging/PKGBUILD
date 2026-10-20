@@ -1,0 +1,63 @@
+# Maintainer: bhimio1
+pkgname=material-3-browser-git
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Zen/Firefox with a Material 3 profile: palette-themed websites and UI, ad blocking"
+arch=('x86_64' 'aarch64')
+url="https://github.com/bhimio1/material-3-browser"
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'libglvnd' 'xdg-utils')
+makedepends=('cargo' 'git' 'nodejs' 'npm')
+optdepends=(
+  'zen-browser-bin: the recommended engine (AUR; or the app.zen_browser.zen Flatpak)'
+  'librewolf: engine that also runs unsigned builds of the extension'
+  'firefox: fallback engine'
+  'flatpak: running the Zen Flatpak'
+)
+provides=('material-3-browser')
+conflicts=('material-3-browser' 'material-3-browser-bin')
+source=("$pkgname::git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$pkgname"
+  printf "0.1.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+  cd extension
+  npm ci
+}
+
+build() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release
+  cd extension
+  npm run stage
+}
+
+check() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen
+  cd extension
+  npm test
+}
+
+package() {
+  cd "$pkgname"
+  install -Dm755 target/release/m3-browser "$pkgdir/usr/bin/m3-browser"
+  # A build from source isn't Mozilla-signed: Zen needs development loading
+  # (m3-browser --settings) or use LibreWolf. The -bin package ships the signed one.
+  install -Dm644 extension/stage/material-3-browser.xpi "$pkgdir/usr/share/m3-browser/material-3-browser.xpi"
+  cp -r extension/stage/extension "$pkgdir/usr/share/m3-browser/extension"
+  install -Dm644 packaging/material_3_browser.desktop "$pkgdir/usr/share/applications/material_3_browser.desktop"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 extension/LICENSE-THIRD-PARTY.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE-THIRD-PARTY.md"
+  install -Dm644 launcher/assets/fonts/LICENSE-Inter.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-Inter.txt"
+}

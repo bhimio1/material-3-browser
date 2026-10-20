@@ -20,6 +20,8 @@ window instead.
 
 Options:
   --settings      Open the setup / settings window
+  --new-window, --new-tab, --private-window
+                  Passed through to the browser
   --status        Print what would run, as JSON
   --native-host   Run as the extension's native messaging host (used by the browser)
   -h, --help      Show this help
@@ -81,6 +83,8 @@ fn main() {
                 return;
             }
             "--settings" => settings = true,
+            // Passed through to the browser (desktop actions use these).
+            "--new-window" | "--new-tab" | "--private-window" => urls.push(a.clone()),
             "--status" => {
                 println!("{}", serde_json::to_string_pretty(&status_json()).unwrap_or_default());
                 return;

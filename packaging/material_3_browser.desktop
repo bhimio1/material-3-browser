@@ -1,0 +1,26 @@
+[Desktop Entry]
+Type=Application
+Name=Browser
+GenericName=Web Browser
+Comment=Zen with your Material 3 palette, themed websites and ad blocking
+Exec=m3-browser %U
+Icon=web-browser
+Terminal=false
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/pdf;x-scheme-handler/http;x-scheme-handler/https;
+Keywords=web;browser;internet;zen;firefox;
+StartupWMClass=material_3_browser
+StartupNotify=true
+Actions=new-window;new-private-window;settings;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=m3-browser --new-window
+
+[Desktop Action new-private-window]
+Name=New Private Window
+Exec=m3-browser --private-window
+
+[Desktop Action settings]
+Name=Browser Settings
+Exec=m3-browser --settings

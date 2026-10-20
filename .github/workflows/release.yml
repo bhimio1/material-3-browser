@@ -1,0 +1,136 @@
+name: Release
+
+# Push a tag like v0.1.0 (or run this by hand with an existing tag) to:
+#   1. build m3-browser and the extension, and sign the extension through
+#      addons.mozilla.org (unlisted) when the AMO_JWT_ISSUER and
+#      AMO_JWT_SECRET secrets exist (otherwise it ships unsigned),
+#   2. attach a Linux tarball to the GitHub release (end4-pC's installer
+#      downloads it), and
+#   3. publish material-3-browser-bin and -git to the AUR when the
+#      AUR_SSH_PRIVATE_KEY, AUR_USERNAME and AUR_EMAIL secrets exist.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to rebuild and republish (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  BIN: m3-browser
+  APP_ID: material_3_browser
+  PKG: material-3-browser
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    outputs:
+      sha256: ${{ steps.package.outputs.sha256 }}
+    env:
+      HAS_AMO: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - name: Test launcher
+        run: cargo test --locked
+      - name: Build launcher
+        run: cargo build --locked --release
+      - name: Build and test extension
+        working-directory: extension
+        run: |
+          npm ci
+          # The add-on version must match the tag (AMO rejects reused versions).
+          npm version --no-git-tag-version --allow-same-version "${TAG#v}"
+          npm run typecheck
+          npm test
+          npm run stage
+          npx web-ext lint --source-dir dist
+      - name: Sign extension (unlisted)
+        if: env.HAS_AMO == 'true'
+        working-directory: extension
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          npx web-ext sign --channel unlisted --source-dir dist --artifacts-dir signed --approval-timeout 1800000
+          cp signed/*.xpi stage/material-3-browser.xpi
+      - name: Note an unsigned build
+        if: env.HAS_AMO != 'true'
+        run: echo "::notice::AMO_JWT_ISSUER/AMO_JWT_SECRET aren't set, so the extension is unsigned. Zen and Firefox need development loading until a signed release exists."
+      - name: Package
+        id: package
+        run: |
+          dir="$BIN-x86_64-linux"
+          mkdir -p "$dir/share/m3-browser"
+          cp "target/release/$BIN" "$dir/"
+          cp "packaging/$APP_ID.desktop" "$dir/"
+          cp extension/stage/material-3-browser.xpi "$dir/share/m3-browser/"
+          cp -r extension/stage/extension "$dir/share/m3-browser/extension"
+          cp LICENSE extension/LICENSE-THIRD-PARTY.md launcher/assets/fonts/LICENSE-Inter.txt "$dir/"
+          tar czf "$dir.tar.gz" "$dir"
+          sha256sum "$dir.tar.gz" > "$dir.tar.gz.sha256"
+          echo "sha256=$(cut -d' ' -f1 "$dir.tar.gz.sha256")" >> "$GITHUB_OUTPUT"
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          files: |
+            ${{ env.BIN }}-x86_64-linux.tar.gz
+            ${{ env.BIN }}-x86_64-linux.tar.gz.sha256
+            extension/stage/material-3-browser.xpi
+
+  aur:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+      - name: Skip without AUR credentials
+        if: env.HAS_KEY != 'true'
+        run: echo "::notice::AUR_SSH_PRIVATE_KEY isn't set, so nothing was published to the AUR."
+      - name: Fill in the -bin PKGBUILD
+        if: env.HAS_KEY == 'true'
+        run: |
+          mkdir -p aur-bin
+          sed -e "s/@PKGVER@/${TAG#v}/" -e "s/@SHA256@/${{ needs.build.outputs.sha256 }}/" \
+            packaging/aur/PKGBUILD-bin > aur-bin/PKGBUILD
+      - name: Publish ${{ env.PKG }}-bin
+        if: env.HAS_KEY == 'true'
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
+        with:
+          pkgname: ${{ env.PKG }}-bin
+          pkgbuild: ./aur-bin/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update to ${{ env.TAG }}
+          ssh_keyscan_types: rsa,ecdsa,ed25519
+      - name: Publish ${{ env.PKG }}-git
+        if: env.HAS_KEY == 'true'
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
+        with:
+          pkgname: ${{ env.PKG }}-git
+          pkgbuild: ./packaging/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update PKGBUILD for ${{ env.TAG }}
+          allow_empty_commits: false
+          ssh_keyscan_types: rsa,ecdsa,ed25519
