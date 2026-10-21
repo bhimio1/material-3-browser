@@ -219,6 +219,20 @@ async function init() {
   await applyBrowserTheme();
   connectHost();
   void loadFixes();
+  void replaceHomeTabs();
+}
+
+/**
+ * A dev-loaded extension is installed after the first window has already
+ * opened the browser's own home page, so swap untouched home tabs for ours.
+ */
+async function replaceHomeTabs() {
+  const page = browser.runtime.getURL("newtab.html");
+  for (const tab of await browser.tabs.query({})) {
+    if (tab.id !== undefined && (tab.url === "about:home" || tab.url === "about:newtab")) {
+      await browser.tabs.update(tab.id, { url: page, loadReplace: true }).catch(() => null);
+    }
+  }
 }
 
 void init();
