@@ -26,19 +26,21 @@
   font-weight: 500 700;
 }
 
-/* ---- Palette roles (from the theme API, with neutral fallbacks) ---- */
+/* ---- Palette roles (from the theme API, with neutral fallbacks) ----
+ * The theme API sets these variables on the root element. Names checked
+ * against Firefox 153/158 and Zen 1.23; older names follow as fallbacks. */
 :root {
-  --m3-surface: var(--toolbar-bgcolor, light-dark(#fdf8fd, #141218));
-  --m3-on-surface: var(--toolbar-color, light-dark(#1c1b1f, #e6e1e5));
+  --m3-surface: var(--toolbar-background-color, var(--toolbar-bgcolor, light-dark(#fdf8fd, #141218)));
+  --m3-on-surface: var(--toolbar-text-color, var(--toolbar-color, light-dark(#1c1b1f, #e6e1e5)));
   --m3-surface-container: var(--lwt-accent-color, light-dark(#f2ecf4, #211f26));
-  --m3-surface-container-high: var(--arrowpanel-background, light-dark(#ece6ee, #2b2930));
+  --m3-surface-container-high: var(--panel-background-color, var(--arrowpanel-background, light-dark(#ece6ee, #2b2930)));
   --m3-surface-container-highest: var(--toolbar-field-background-color, light-dark(#e6e0e9, #36343b));
   --m3-surface-container-low: var(--sidebar-background-color, var(--m3-surface-container));
-  --m3-on-surface-variant: var(--lwt-toolbarbutton-icon-fill, var(--toolbarbutton-icon-fill, light-dark(#49454f, #cac4d0)));
+  --m3-on-surface-variant: var(--toolbarbutton-icon-fill, var(--lwt-toolbarbutton-icon-fill, light-dark(#49454f, #cac4d0)));
   --m3-primary: var(--lwt-tab-line-color, var(--tab-line-color, AccentColor));
-  --m3-secondary-container: var(--tab-selected-bgcolor, light-dark(#e8def8, #4a4458));
-  --m3-on-secondary-container: var(--tab-selected-textcolor, var(--m3-on-surface));
-  --m3-outline-variant: var(--arrowpanel-border-color, light-dark(#cac4d0, #49454f));
+  --m3-secondary-container: var(--tab-background-color-selected, var(--tab-selected-bgcolor, light-dark(#e8def8, #4a4458)));
+  --m3-on-secondary-container: var(--tab-selected-textcolor, var(--tab-text-color-selected, var(--m3-on-surface)));
+  --m3-outline-variant: var(--panel-border-color, var(--arrowpanel-border-color, light-dark(#cac4d0, #49454f)));
 
   --m3-radius-small: 8px;
   --m3-radius: 16px;
@@ -114,4 +116,12 @@ menupopup > menu:is([_moz-menuactive], :hover) {
 /* Selection and focus in the URL bar use the primary color. */
 #urlbar ::selection {
   background-color: color-mix(in srgb, var(--m3-primary) 35%, transparent) !important;
+}
+
+/* The new tab and home pages are ours on purpose: no "Your new tab/homepage
+   has changed" prompts, which a dev-loaded (temporary) extension would get on
+   every start. */
+#extension-new-tab-notification,
+#extension-homepage-notification {
+  display: none !important;
 }
