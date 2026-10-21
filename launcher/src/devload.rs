@@ -10,17 +10,33 @@ use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+/// Longest path a Unix socket can have (sun_path is 108 bytes with the NUL).
+const MAX_SOCKET_PATH: usize = 107;
+
 /// `$XDG_RUNTIME_DIR/m3-browser/devtools.sock`, in a 0700 folder.
 pub fn socket_path() -> PathBuf {
-    let base = dirs::runtime_dir().unwrap_or_else(std::env::temp_dir);
-    base.join("m3-browser").join("devtools.sock")
+    match dirs::runtime_dir().map(|d| d.join("m3-browser").join("devtools.sock")) {
+        Some(p) if p.as_os_str().len() <= MAX_SOCKET_PATH => p,
+        // No runtime dir, or one too deep for a socket: a private folder in /tmp.
+        _ => PathBuf::from(format!("/tmp/m3-browser-{}", uid())).join("devtools.sock"),
+    }
+}
+
+fn uid() -> u32 {
+    use std::os::unix::fs::MetadataExt;
+    std::fs::metadata("/proc/self").map(|m| m.uid()).unwrap_or(0)
 }
 
 pub fn prepare_socket_dir() -> std::io::Result<PathBuf> {
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::{MetadataExt, PermissionsExt};
     let path = socket_path();
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
+        // In a shared /tmp someone else could have made the folder first.
+        let meta = std::fs::symlink_metadata(dir)?;
+        if !meta.is_dir() || meta.uid() != uid() {
+            return Err(std::io::Error::other(format!("{} isn't a folder of ours", dir.display())));
+        }
         std::fs::set_permissions(dir, std::fs::Permissions::from_mode(0o700))?;
     }
     Ok(path)
@@ -119,6 +135,11 @@ pub fn load_when_ready(socket: &Path, extension: &Path, timeout: Duration) -> Re
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn socket_path_fits_sun_path() {
+        assert!(socket_path().as_os_str().len() <= MAX_SOCKET_PATH);
+    }
 
     #[test]
     fn packet_round_trip() {
