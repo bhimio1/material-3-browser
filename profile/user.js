@@ -12,6 +12,10 @@ user_pref("zen.theme.disable-lightweight", false);
 user_pref("zen.theme.border-radius", 16);
 user_pref("zen.theme.content-element-separation", 8);
 user_pref("zen.welcome-screen.seen", true);
+// Ctrl+T opens the Material 3 new tab page instead of Zen's floating URL bar.
+user_pref("zen.urlbar.replace-newtab", false);
+// No "Update complete" card on a fresh profile (Zen still updates normally).
+user_pref("zen.updates.show-update-notification", false);
 user_pref("svg.context-properties.content.enabled", true);
 user_pref("layout.css.has-selector.enabled", true);
 user_pref("widget.gtk.rounded-bottom-corners.enabled", true);
@@ -24,6 +28,16 @@ user_pref("extensions.enabledScopes", 15);
 user_pref("extensions.pocket.enabled", false);
 user_pref("extensions.getAddons.showPane", false);
 user_pref("extensions.htmlaboutaddons.recommendations.enabled", false);
+
+// ---- First run: no welcome tour, onboarding modal or what's-new pages ----
+user_pref("browser.preonboarding.enabled", false);
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);
+user_pref("startup.homepage_welcome_url", "");
+user_pref("startup.homepage_welcome_url.additional", "");
+user_pref("browser.startup.homepage_override.mstone", "ignore");
+user_pref("browser.messaging-system.whatsNewPanel.enabled", false);
+user_pref("browser.uitour.enabled", false);
 
 // ---- Desktop integration ----
 user_pref("widget.use-xdg-desktop-portal.file-picker", 1);

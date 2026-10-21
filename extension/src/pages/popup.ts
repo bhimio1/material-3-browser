@@ -44,8 +44,8 @@ async function render() {
           void render();
         })),
       state.reason === "already-dark"
-        ? row("Theme it anyway", "Forget that this site looked dark.", h("button", { class: "tonal", onclick: async () => {
-            await browser.runtime.sendMessage({ type: "forgetDarkSite", url });
+        ? row("Theme it anyway", "Theme it even though it looked dark.", h("button", { class: "tonal", onclick: async () => {
+            await browser.runtime.sendMessage({ type: "themeAnyway", url });
             void save(settings);
           } }, "Theme"))
         : null,
