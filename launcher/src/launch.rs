@@ -79,6 +79,10 @@ pub fn command(plan: &Plan, urls: &[String]) -> Command {
     if let Some(sock) = &plan.rdp_socket {
         cmd.arg("--start-debugger-server").arg(sock);
     }
+    // Extra engine arguments for debugging, e.g. "--marionette".
+    if let Ok(extra) = std::env::var("M3_BROWSER_ENGINE_ARGS") {
+        cmd.args(extra.split_whitespace());
+    }
     cmd.args(urls);
     cmd.env("MOZ_ENABLE_WAYLAND", "1");
     cmd
