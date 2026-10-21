@@ -20,7 +20,7 @@ pub fn installed(profile: &Path) -> bool {
 /// system certificate store; ureq with the proxy from the environment is the
 /// fallback.
 fn download(url: &str) -> Result<Vec<u8>, String> {
-    if crate::sys::cmd::exists("curl") {
+    if material_3_ui::sys::cmd::exists("curl") {
         let out = std::process::Command::new("curl")
             .args(["-fsSL", "--max-time", "120", "--max-filesize", "67108864", url])
             .output()

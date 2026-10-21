@@ -27,7 +27,7 @@ pub fn plan(config: &Config) -> Result<Plan, String> {
     let profile_dir = if config.profile_dir.trim().is_empty() {
         engine::default_profile_dir(&engine)
     } else {
-        crate::sys::paths::expand(config.profile_dir.trim())
+        material_3_ui::sys::paths::expand(config.profile_dir.trim())
     };
     let assets = Assets::find();
     // Dev-load needs a socket the browser can create; not inside the Flatpak.

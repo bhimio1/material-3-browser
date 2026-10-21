@@ -8,8 +8,6 @@ mod engine;
 mod host;
 mod launch;
 mod profile;
-mod sys;
-mod theme;
 mod ublock;
 mod ui;
 
@@ -113,7 +111,7 @@ fn main() {
     });
     if let Err(e) = result {
         eprintln!("m3-browser: {e}");
-        let _ = sys::cmd::spawn_detached("notify-send", &["-a", "Material 3 Browser", "Couldn't start the browser", &e]);
+        material_3_ui::notify::error("Material 3 Browser", "Couldn't start the browser", &e);
         std::process::exit(1);
     }
 }

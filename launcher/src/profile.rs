@@ -208,7 +208,7 @@ pub fn install_native_host(engine: Option<&Engine>, exe: &Path) -> anyhow::Resul
     // Inside the Flatpak sandbox the host has to be started on the host
     // system through flatpak-spawn (needs org.freedesktop.Flatpak access).
     let flatpak_script = if engine.is_some_and(|e| e.flatpak) {
-        let var = crate::sys::paths::home().join(".var/app").join(engine::ZEN_FLATPAK_ID).join("data/m3-browser");
+        let var = material_3_ui::sys::paths::home().join(".var/app").join(engine::ZEN_FLATPAK_ID).join("data/m3-browser");
         std::fs::create_dir_all(&var)?;
         let s = var.join("native-host.sh");
         write_if_changed(&s, format!("#!/bin/sh\nexec flatpak-spawn --host {quoted} --native-host \"$@\"\n").as_bytes())?;
@@ -220,7 +220,7 @@ pub fn install_native_host(engine: Option<&Engine>, exe: &Path) -> anyhow::Resul
 
     let mut written = Vec::new();
     for dir in engine::native_manifest_dirs(engine) {
-        let in_sandbox = dir.starts_with(crate::sys::paths::home().join(".var/app"));
+        let in_sandbox = dir.starts_with(material_3_ui::sys::paths::home().join(".var/app"));
         let path = if in_sandbox {
             match &flatpak_script {
                 Some(s) => s.clone(),
@@ -312,12 +312,12 @@ pub fn parse_profiles_ini(base: &Path, text: &str) -> Vec<(String, PathBuf, bool
 }
 
 pub fn import_sources() -> Vec<SourceProfile> {
-    let home = crate::sys::paths::home();
+    let home = material_3_ui::sys::paths::home();
     let roots: [(&'static str, PathBuf); 5] = [
         ("Zen", home.join(".zen")),
         ("Zen (Flatpak)", home.join(".var/app").join(engine::ZEN_FLATPAK_ID).join(".zen")),
         ("Firefox", home.join(".mozilla/firefox")),
-        ("Firefox", crate::sys::paths::config_home().join("mozilla/firefox")),
+        ("Firefox", material_3_ui::sys::paths::config_home().join("mozilla/firefox")),
         ("LibreWolf", home.join(".librewolf")),
     ];
     let mut out = Vec::new();
