@@ -19,7 +19,8 @@ let hostConnected = false;
 let port: browser.runtime.Port | null = null;
 let reconnectDelay = 1000;
 const pausedTabs = new Set<number>();
-let darkSites: Record<string, number> = {};
+/** Whether each origin looked dark on its own, and when we last looked. */
+let siteLooks: Record<string, { dark: boolean; at: number }> = {};
 let fixes: FixEntry[] | null = null;
 const wallpaperWaiters: ((url: string | null) => void)[] = [];
 
@@ -112,9 +113,10 @@ async function contentState(url: string, tabId?: number): Promise<ContentState> 
   if (tabId !== undefined && pausedTabs.has(tabId)) return off("paused");
   if (!listAllows(settings, url)) return off(settings.listMode === "whitelist" ? "not-whitelisted" : "blacklist");
   const o = origin(url);
-  const known = o ? darkSites[o] : undefined;
+  const look = o ? siteLooks[o] : undefined;
+  const known = look && Date.now() - look.at < DARK_SITE_TTL ? look : undefined;
   const skipDark = dark && settings.skipDarkSites && !site?.mode;
-  if (skipDark && known && Date.now() - known < DARK_SITE_TTL) return off("already-dark");
+  if (skipDark && known?.dark) return off("already-dark");
   const roles = dark ? p.dark : p.light;
   return {
     enabled: true,
@@ -138,9 +140,8 @@ browser.runtime.onMessage.addListener(async (msg: unknown, sender: browser.runti
     case "reportDark": {
       const o = origin(String(m.url));
       if (o) {
-        if (m.dark) darkSites[o] = Date.now();
-        else delete darkSites[o];
-        await browser.storage.local.set({ darkSites });
+        siteLooks[o] = { dark: !!m.dark, at: Date.now() };
+        await browser.storage.local.set({ siteLooks });
       }
       return true;
     }
@@ -160,10 +161,11 @@ browser.runtime.onMessage.addListener(async (msg: unknown, sender: browser.runti
       await browser.tabs.sendMessage(tabId, { type: "refresh" }).catch(() => null);
       return true;
     }
-    case "forgetDarkSite": {
+    case "themeAnyway": {
+      // Remember the site as not dark, so it isn't detected and skipped again.
       const o = origin(String(m.url));
-      if (o) delete darkSites[o];
-      await browser.storage.local.set({ darkSites });
+      if (o) siteLooks[o] = { dark: false, at: Date.now() };
+      await browser.storage.local.set({ siteLooks });
       await refreshTabs();
       return true;
     }
@@ -202,12 +204,16 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
 });
 
 async function init() {
-  const stored = await browser.storage.local.get(["settings", "palette", "darkSites"]);
+  const stored = await browser.storage.local.get(["settings", "palette", "siteLooks"]);
   settings = migrate(stored.settings);
   if (JSON.stringify(stored.settings) !== JSON.stringify(settings)) {
     await browser.storage.local.set({ settings });
   }
-  darkSites = (stored.darkSites as Record<string, number>) ?? {};
+  siteLooks = (stored.siteLooks as typeof siteLooks) ?? {};
+  for (const [o, look] of Object.entries(siteLooks)) {
+    if (Date.now() - look.at > DARK_SITE_TTL) delete siteLooks[o];
+  }
+  void browser.storage.local.remove("darkSites");
   // Use the last palette from the host until it answers.
   palette = (stored.palette as PaletteMessage) ?? null;
   await applyBrowserTheme();

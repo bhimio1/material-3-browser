@@ -21,6 +21,16 @@ function domReady(): Promise<void> {
     : Promise.resolve();
 }
 
+/** The page's own stylesheets, so a dark site isn't judged by its unstyled body. */
+function stylesLoaded(timeout = 1500): Promise<void> {
+  return document.readyState === "complete"
+    ? Promise.resolve()
+    : new Promise((r) => {
+        window.addEventListener("load", () => r(), { once: true });
+        setTimeout(r, timeout);
+      });
+}
+
 async function apply() {
   let state: ContentState;
   try {
@@ -36,7 +46,11 @@ async function apply() {
   if (state.detectDark) {
     // First visit with "skip already-dark sites": look before theming.
     await domReady();
-    const dark = pageIsDark(document);
+    let dark = pageIsDark(document);
+    if (!dark) {
+      await stylesLoaded();
+      dark = pageIsDark(document);
+    }
     void sendMessage({ type: "reportDark", url: location.href, dark }).catch(() => null);
     if (dark) return;
   }
