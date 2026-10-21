@@ -2,7 +2,7 @@
 //! then LibreWolf and the Firefox channels.
 
 use crate::config::EngineChoice;
-use crate::sys::{cmd, paths};
+use material_3_ui::sys::{cmd, paths};
 use std::path::PathBuf;
 
 pub const ZEN_FLATPAK_ID: &str = "app.zen_browser.zen";

@@ -108,7 +108,7 @@ Website-theming options are in the browser: click the palette button in the tool
 ## How the palette gets in
 
 1. The launcher installs a native messaging host: `m3-browser --native-host`, registered under `~/.mozilla`, `~/.zen`, `~/.librewolf` and `~/.config/mozilla`.
-2. The host reads end4-pC's `~/.local/state/quickshell/user/generated/colors.json` (or the seed color in `~/.config/m3-browser/config.toml`), sends both the light and dark schemes, and pushes an update whenever the file changes.
+2. The host reads end4-pC's `~/.local/state/quickshell/user/generated/colors.json` (else the Material 3 File Manager's `theme.json`, or the seed color under `[appearance]` in `~/.config/m3-browser/config.toml`), sends both the light and dark schemes, and pushes an update whenever the file changes. The settings window follows the same palette.
 3. The extension caches the last palette, so pages theme instantly on start.
 
 **Zen Flatpak:** the host has to run outside the sandbox through `flatpak-spawn`, which needs the `org.freedesktop.Flatpak` permission. The setup window can grant it. Otherwise, import a `colors.json` in the extension's settings, or use the seed color.
@@ -117,7 +117,7 @@ Website-theming options are in the browser: click the palette button in the tool
 
 ```
 launcher/     m3-browser (Rust): engine detection, profile, native host, uBlock Origin,
-              development loading, setup window (shared Material 3 egui style)
+              development loading, setup window (on the shared material-3-ui crate)
 profile/      user.js and the chrome stylesheets (userChrome.css maps Zen's colors onto
               the theme API; m3-compat.css holds the markup-dependent selectors;
               m3-custom.css in the profile is yours and never overwritten)

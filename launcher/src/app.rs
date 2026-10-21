@@ -1,21 +1,24 @@
 //! The setup / settings window: shows what will run and how, and lets the
 //! user pick the engine, signing workaround, uBlock Origin and import.
 
-use crate::config::{ColorScheme, Config, ThemeSource};
+use crate::config::Config;
 use crate::engine::{self, Engine};
 use crate::launch::{self, Plan};
-use crate::sys::task::Task;
-use crate::theme::{sources, style, M3Palette};
-use crate::ui::toasts::{Toast, Toasts};
-use crate::ui::{self, widgets, Action, Page, ToastKind};
+use crate::ui::{self, Action, Page, ToastKind};
 use egui::{CornerRadius, Frame, Margin};
+use material_3_ui::sys::task::Task;
+use material_3_ui::theme::{M3Palette, ThemeManager};
+use material_3_ui::toasts::{Toast, Toasts};
+use material_3_ui::widgets;
 
 pub struct App {
     pub ctx: egui::Context,
+    /// The theme's current palette.
     pub palette: M3Palette,
+    pub theme: ThemeManager,
     pub config: Config,
     pub page: Page,
-    pub toasts: Toasts,
+    pub toasts: Toasts<Action>,
     pub actions: Vec<Action>,
     pub engines: Task<Vec<Engine>>,
     pub plan: Result<Plan, String>,
@@ -23,21 +26,20 @@ pub struct App {
     pub launching: Task<Result<Vec<String>, String>>,
     pub import: Task<Result<Vec<&'static str>, String>>,
     pub import_sources: Vec<crate::profile::SourceProfile>,
-    pub seed_text: Option<String>,
     /// First run: this window is the setup assistant.
     pub setup: bool,
-    system_dark: Option<bool>,
 }
 
 impl App {
     pub fn new(cc: &eframe::CreationContext<'_>, setup: bool) -> Self {
         let ctx = cc.egui_ctx.clone();
-        style::install_fonts(&ctx);
         let config = Config::load();
+        let theme = ThemeManager::new(&ctx, &config.appearance);
         let mut engines = Task::default();
         engines.spawn(&ctx, engine::available);
         let mut app = Self {
-            palette: M3Palette::from_seed(crate::theme::palette::DEFAULT_SEED, true),
+            palette: theme.palette().clone(),
+            theme,
             plan: launch::plan(&config),
             config,
             page: Page::Overview,
@@ -47,12 +49,10 @@ impl App {
             launching: Task::default(),
             import: Task::default(),
             import_sources: crate::profile::import_sources(),
-            seed_text: None,
             setup,
-            system_dark: ctx.system_theme().map(|t| t == egui::Theme::Dark),
             ctx,
         };
-        app.apply_theme();
+        app.theme_applied();
         app
     }
 
@@ -60,30 +60,17 @@ impl App {
         self.toasts.push(Toast::new(text, kind));
     }
 
-    pub fn theme_file(&self) -> Option<std::path::PathBuf> {
-        match self.config.theme_source {
-            ThemeSource::Auto => sources::end4_colors_path().filter(|p| p.is_file()),
-            ThemeSource::Seed => None,
-        }
+    /// Apply the appearance settings after they changed.
+    pub fn apply_theme(&mut self) {
+        self.theme.apply(&self.config.appearance);
+        self.theme_applied();
     }
 
-    pub fn apply_theme(&mut self) {
-        let dark = match self.config.color_scheme {
-            ColorScheme::Light => false,
-            ColorScheme::Dark => true,
-            ColorScheme::System => self.system_dark.unwrap_or(true),
-        };
-        let palette = self
-            .theme_file()
-            .and_then(|p| M3Palette::from_theme_json(&p).ok())
-            .unwrap_or_else(|| M3Palette::from_seed(&self.config.seed_color, dark));
-        style::apply(&self.ctx, &palette);
-        widgets::set_palette(&self.ctx, palette.clone());
-        let scale = self.config.ui_scale.clamp(0.6, 2.5);
-        if (self.ctx.zoom_factor() - scale).abs() > f32::EPSILON {
-            self.ctx.set_zoom_factor(scale);
+    fn theme_applied(&mut self) {
+        if let Some(e) = self.theme.take_error() {
+            self.toast(e, ToastKind::Error);
         }
-        self.palette = palette;
+        self.palette = self.theme.palette().clone();
     }
 
     fn process(&mut self, action: Action) {
@@ -114,6 +101,10 @@ impl App {
     }
 
     fn poll(&mut self) {
+        // Palette file changes and system light/dark switches.
+        if self.theme.poll(&self.config.appearance) {
+            self.theme_applied();
+        }
         self.engines.poll();
         if let Some(result) = self.launching.take() {
             match result {
@@ -137,7 +128,7 @@ impl App {
     }
 
     fn sidebar(&mut self, ui: &mut egui::Ui) {
-        use egui_material_icons::icons::*;
+        use material_3_ui::icons::icons::*;
         let p = self.palette.clone();
         ui.horizontal(|ui| {
             ui.add_space(12.0);
@@ -195,7 +186,8 @@ impl eframe::App for App {
                         ui::pages::show(ui, self);
                     });
             });
-        ui::toasts::show(&self.ctx.clone(), self);
+        let fired = self.toasts.show(&self.ctx.clone(), &p, 20.0);
+        self.actions.extend(fired);
         while !self.actions.is_empty() {
             for a in std::mem::take(&mut self.actions) {
                 self.process(a);

@@ -1,16 +1,8 @@
 //! The setup / settings window.
 
-pub mod common;
 pub mod pages;
-pub mod toasts;
-pub mod widgets;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ToastKind {
-    Info,
-    Success,
-    Error,
-}
+pub use material_3_ui::toasts::ToastKind;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Page {
@@ -36,8 +28,8 @@ impl Page {
         }
     }
 
-    pub fn icon(self) -> egui_material_icons::MaterialIcon {
-        use egui_material_icons::icons::*;
+    pub fn icon(self) -> material_3_ui::icons::MaterialIcon {
+        use material_3_ui::icons::icons::*;
         match self {
             Page::Overview => ICON_DASHBOARD,
             Page::Engine => ICON_PUBLIC,
